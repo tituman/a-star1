@@ -1,0 +1,10 @@
+;Wien;Eisenstadt;St. Poelten;Linz;Graz;Klagenfurt;Salzburg;Innsbruck;Bregenz
+Wien;0;63;64;x;199;x;x;x;x
+Eisenstadt;63;0;x;x;172;x;x;x;x
+St. Poelten;64;x;0;126;229;x;x;x;x
+Linz;x;x;126;0;220;250;132;x;x
+Graz;199;172;229;220;0;136;278;x;x
+Klagenfurt;x;x;x;250;136;0;220;x;x
+Salzburg;x;x;x;132;278;220;0;187;x
+Innsbruck;x;x;x;x;x;x;187;0;189
+Bregenz;x;x;x;x;x;x;x;189;0
