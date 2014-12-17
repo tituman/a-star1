@@ -7,3 +7,6 @@ H:\a-star\a-star\obj\Debug\a-star.pdb
 C:\Users\winhac\Documents\GitHub\a-star\a-star\bin\Debug\a-star.exe.config
 C:\Users\winhac\Documents\GitHub\a-star\a-star\obj\Debug\a-star.exe
 C:\Users\winhac\Documents\GitHub\a-star\a-star\obj\Debug\a-star.pdb
+C:\Users\winhac\Documents\GitHub\a-star1\a-star\bin\Debug\a-star.exe.config
+C:\Users\winhac\Documents\GitHub\a-star1\a-star\obj\Debug\a-star.exe
+C:\Users\winhac\Documents\GitHub\a-star1\a-star\obj\Debug\a-star.pdb
