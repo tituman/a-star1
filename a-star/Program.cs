@@ -10,35 +10,72 @@ namespace a_star
     class Program
     {
         const char CSV_SEPARATOR = ';';
+        static List<City> cityList;
+        static SortedList<City, int> openList;
+        static List<City> closedList;
 
         static void Main(string[] args)
         {
             Console.WindowWidth = 150;
-            string[][] streetsMat = csv_einlesen("streets.csv");
-            string[][] airlinesMat = csv_einlesen("airline.csv");
+            string[][] streetsMat = csv_read("streets.csv");
+            string[][] airlinesMat = csv_read("airline.csv");
             int[][] streetsInt = csv_toInt(streetsMat);
             int[][] airlinesInt = csv_toInt(airlinesMat);
             string[] cities = extractCityNames(streetsMat);
             Console.WriteLine("enter start city: \n================");
             printMat1dIndexes(cities);
-            int targetCity;
-            while (!Int32.TryParse(Console.ReadLine(), out targetCity))
+
+            //get starting city
+            int startingCity;
+            while (true)
             {
-                Console.Write("enter start city: ");
+                Int32.TryParse(Console.ReadLine(), out startingCity);
+                try
+                {
+                    cities.ElementAt(startingCity);
+                }
+                catch (Exception)
+                {
+                    Console.Write("enter a valid index for initial city: ");
+                    continue;
+                }
+                break;
             }
-            printMat2dInt(streetsInt);
-            printMat2dInt(airlinesInt);
+            Console.WriteLine("Chosen initial city: " + cities.ElementAt(startingCity) + "\n");
+
+            // get target city
+            Console.WriteLine("enter target city: \n================");
+            int targetCity;
+            while (true)
+            {
+                Int32.TryParse(Console.ReadLine(), out targetCity);
+                try
+                {
+                    cities.ElementAt(targetCity);
+                }
+                catch (Exception)
+                {
+                    Console.Write("enter a valid index for target city: ");
+                    continue;
+                }
+                break;
+            }
+
+            Console.WriteLine("Chosen target city: " + cities.ElementAt(targetCity) + "\n");
+            
+            //printMat2dInt(streetsInt);
+            //printMat2dInt(airlinesInt);
 
             // add data to lists
 
             //add first city
-            List<City> cityList = new List<City>();
+            cityList = new List<City>();
             
 
             //then traverse the array contatining the airline while building the list
             for (int i = 0; i < cities.GetLength(0); i++)
             {
-                cityList.Add(new City(cities[i], airlinesInt[targetCity][i]));
+                cityList.Add(new City(cities[i], i, airlinesInt[targetCity][i]));
                 //Console.WriteLine(cities[i] + "..." + airlinesInt[targetCity][i]);
                 
             }
@@ -56,8 +93,100 @@ namespace a_star
 
             }
 
+            // now cityList has the following info:
+            //  * air distances from chosen city to all the others
+            //  * list of neighbors to chosen city
+            //  * street distance to neighbors ( or max int when not directly reachable)
+
+            do_a_star(startingCity, targetCity);
+
 
             Console.ReadKey();
+        }
+
+        private static void do_a_star(int initialCityIdx, int targetCityIdx)
+        {
+            City initialCity = cityList.ElementAt(initialCityIdx);
+            City targetCity = cityList.ElementAt(targetCityIdx);
+            openList = new SortedList<City, int>();
+            closedList = new List<City>();
+            int current_f;
+
+            openList.Add(initialCity, 0);
+            City currentCity;
+            do
+            {
+                //get next city in the open cities list
+                currentCity = openList.First().Key;
+Console.WriteLine(currentCity.name);
+                current_f = openList.First().Value;
+                openList.RemoveAt(0);
+
+                // are we done yet?
+                if (currentCity.Equals(targetCity))
+                {
+                    // target found!
+                    //break
+                    ;
+                }
+
+                closedList.Add(currentCity);
+
+                expandCity(currentCity, current_f);
+
+
+                
+            } while (openList.Count > 0);
+
+
+
+        }
+
+        /// <summary>
+        /// checks all neighbors to find the best next step
+        /// </summary>
+        /// <param name="currentCity"> the city to check for neighbor suitability</param>
+        private static void expandCity(City currentCity, int current_f)
+        {
+            foreach (KeyValuePair<City, int> possibleSuccesor in currentCity.neighbors)
+            {
+                if (closedList.Contains(possibleSuccesor.Key))
+                {
+                    continue;
+                }
+
+                if (possibleSuccesor.Value == int.MaxValue)
+                {
+                    continue;
+                }
+
+                int tentative_g = current_f + possibleSuccesor.Value;
+
+                //if possibleSuccesor is already in the open list
+                if (openList.ContainsKey(possibleSuccesor.Key))
+                {
+                    // and tentative g is >= than the f stored for possibleSuccesor 
+                    if (tentative_g >= openList[possibleSuccesor.Key])
+                    {
+                        //then ignore it
+                        continue;                        
+                    }
+                }
+                int f = tentative_g + possibleSuccesor.Key.airDistance;
+
+                if (openList.ContainsKey(possibleSuccesor.Key))
+                {
+                    openList[possibleSuccesor.Key] = f;
+                }
+                else
+                {
+                    openList.Add(possibleSuccesor.Key, f);
+                }
+
+
+                
+            }
+            
         }
         static void printMat2d(string[][] mat)
         {
@@ -97,7 +226,7 @@ namespace a_star
             }
             Console.WriteLine();
         }
-        static string[][] csv_einlesen(string eingabePfad)
+        static string[][] csv_read(string eingabePfad)
         {
             StreamReader csvDatei;
             try
