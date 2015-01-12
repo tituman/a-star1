@@ -11,6 +11,7 @@ namespace a_star
         public int airDistance;
         public int index;
         public Dictionary<City, int> neighbors;
+        public City predecessor = null;
 
         public City(string name, int index, int airDistance)
         {

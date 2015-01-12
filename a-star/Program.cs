@@ -126,8 +126,15 @@ Console.WriteLine(currentCity.name);
                 if (currentCity.Equals(targetCity))
                 {
                     // target found!
-                    //break
-                    ;
+                    // print path
+                    Console.WriteLine("\n==================\npath found!");
+                    City path = currentCity;
+                    while (path.predecessor != null)
+                    {
+                        Console.WriteLine(path.name);
+                        path = path.predecessor;
+                    }
+                    break;
                 }
 
                 closedList.Add(currentCity);
@@ -151,19 +158,19 @@ Console.WriteLine(currentCity.name);
             foreach (KeyValuePair<City, int> neighbor in currentCity.neighbors)
             {
                 City posSuccesorCity = neighbor.Key;
-                int posSuccesorAirDistance = neighbor.Value;
+                int posSuccesorNeighborDistance = neighbor.Value;
 
                 if (closedList.Contains(posSuccesorCity))
                 {
                     continue;
                 }
 
-                if (posSuccesorAirDistance == int.MaxValue)
+                if (posSuccesorNeighborDistance == int.MaxValue)
                 {
                     continue;
                 }
 
-                int tentative_g = current_f + posSuccesorAirDistance;
+                int tentative_g = current_f + posSuccesorNeighborDistance;
 
                 //if possibleSuccesor is already in the open list
                 if (openList.ContainsValue(posSuccesorCity))
@@ -184,6 +191,9 @@ Console.WriteLine(currentCity.name);
                 }
                 
                 openList.Add(f, posSuccesorCity);
+
+                //write this path to this possible successor
+                posSuccesorCity.predecessor = currentCity;
                 
 
 
