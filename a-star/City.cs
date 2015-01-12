@@ -5,30 +5,89 @@ using System.Text;
 
 namespace a_star
 {
-    class City : IEquatable<City>, IComparable<City>
+    class City : IEquatable<City> , IComparable<City>
     {
-        public string name;
-        //H
-        public int airDistance;
-        //G
-        public int distanceUntilHere = 0;
-        public int index;
-        public Dictionary<City, int> neighbors;
-        public City predecessor = null;
+        private string name;
+        private int airDistance;  //H
+        private int distanceUntilHere;  //G
+        private Dictionary<City, int> neighbors;
+        private City predecessor;
 
-        public City(string name, int index, int airDistance)
+        /// <summary>
+        /// name of this city
+        /// </summary>
+        public string Name
         {
-            this.name = name;
-            this.index = index;
-            this.airDistance = airDistance;
-            neighbors = new Dictionary<City, int>();
-
+            get { return name; }
+            set { name = value; }
         }
 
+        /// <summary>
+        /// air distance, our heuristic, named H() in A*
+        /// </summary>
+        public int AirDistance
+        {
+            get { return airDistance; }
+            set { airDistance = value; }
+        }
+
+        /// <summary>
+        /// distance from starting point until here, named g() in A*
+        /// </summary>
+        public int DistanceUntilHere
+        {
+            get { return distanceUntilHere; }
+            set { distanceUntilHere = value; }
+        }
+
+        /// <summary>
+        /// set of neighbors of this city, 
+        /// currently all other cities are included, 
+        /// but unreachable cities have int.Max as neighbor distance
+        /// </summary>
+        public Dictionary<City, int> Neighbors
+        {
+            get { return neighbors; }
+            set { neighbors = value; }
+        }
+
+        /// <summary>
+        /// when the algorithm is running, the current path found is saved by
+        /// having every visited city to remember its predecessor city
+        /// </summary>
+        public City Predecessor
+        {
+            get { return predecessor; }
+            set { predecessor = value; }
+        }
+
+        /// <summary>
+        /// constructor
+        /// </summary>
+        /// <param name="name">name of city</param>
+        /// <param name="airDistance">air distance to target, H()</param>
+        public City(string name, /*int index,*/ int airDistance)
+        {
+            this.name = name;
+            this.airDistance = airDistance;
+            this.neighbors = new Dictionary<City, int>();
+            this.distanceUntilHere = 0;  //G() will be initialized to 0
+            this.predecessor = null;    // no predecessor at init
+        }
+
+        /// <summary>
+        /// used when populating the data structure that holds the information about 
+        /// G() (distance to neighbor) .
+        /// </summary>
+        /// <param name="city"></param>
+        /// <param name="distance"></param>
         public void addNeighbor(City city, int distance)
         {
             neighbors.Add(city, distance);
         }
+
+
+        // from here on implementations for icomparable and iequatable, shamelessly copied from stackoverflow
 
         /// <summary>
         /// from http://stackoverflow.com/questions/13262106/dictionary-containskey-how-does-it-work
@@ -78,9 +137,12 @@ namespace a_star
         /// <returns></returns>
         public int CompareTo(City that)
         {
-            if (this.index > that.index) return -1;
-            if (this.index == that.index) return 0;
-            return 1;
+            //  just optimization
+            if (ReferenceEquals(null, that)) return -1;
+            if (ReferenceEquals(this, that)) return 0;
+
+            if (this.name == that.name) return 0;
+            return -1;
         }
     }
 }

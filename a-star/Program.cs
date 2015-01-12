@@ -16,17 +16,74 @@ namespace a_star
 
         static void Main(string[] args)
         {
-            Console.WindowWidth = 150;
-            string[][] streetsMat = csv_read("streets.csv");
-            string[][] airlinesMat = csv_read("airline.csv");
-            int[][] streetsInt = csv_toInt(streetsMat);
-            int[][] airlinesInt = csv_toInt(airlinesMat);
-            string[] cities = extractCityNames(streetsMat);
+
+            // init
+            // read csv files from disc
+            // adjacency matrices for street and air distances
+/*
+* This part done together with a student colleague
+*          |||||
+*          vvvvv
+*/
+            int[][] streetsInt; int[][] airlinesInt; string[] cities;
+            initIO(out streetsInt, out airlinesInt, out cities);
+/*
+*          ^^^^^^
+*          ||||||
+* until here 
+*/
+
+            // get input from user about desired path
+            int startingCity;
+            int targetCity;
+            userInputStartAndTargetCity(cities, out startingCity, out targetCity);
+
+
+            // declare new list of cities containing a data structure (City) which
+            // integrates street distances and air distances
+            cityList = new List<City>();
+            
+
+            //then traverse the array contatining the air distances while populating the list
+            // (target city known, so air distances are related to target city
+            for (int i = 0; i < cities.GetLength(0); i++)
+            {
+                cityList.Add(new City(cities[i], airlinesInt[targetCity][i]));
+                
+            }
+
+            //add the street info of all neighbors to each city
+            for (int i = 0; i < cityList.Count; i++)
+            {
+                for (int j = 0; j < cityList.Count; j++)
+			    {
+                    if (i != j)
+                    {
+                        cityList.ElementAt(i).addNeighbor(cityList.ElementAt(j), streetsInt[i][j]);
+                    }
+			    }
+
+            }
+            // now cityList has the following info:
+            //  * air distances from chosen city to all the others
+            //  * list of neighbors to aech city
+            //      * street distance to neighbors ( or max int when not directly reachable)
+
+
+            // begin finding path
+            do_a_star(startingCity, targetCity);
+
+
+            Console.ReadKey();
+        }
+
+        private static void userInputStartAndTargetCity(string[] cities, out int startingCity, out int targetCity)
+        {
             Console.WriteLine("enter start city: \n================");
             printMat1dIndexes(cities);
 
             //get starting city
-            int startingCity;
+
             while (true)
             {
                 Int32.TryParse(Console.ReadLine(), out startingCity);
@@ -45,7 +102,7 @@ namespace a_star
 
             // get target city
             Console.WriteLine("enter target city: \n================");
-            int targetCity;
+
             while (true)
             {
                 Int32.TryParse(Console.ReadLine(), out targetCity);
@@ -62,46 +119,16 @@ namespace a_star
             }
 
             Console.WriteLine("Chosen target city: " + cities.ElementAt(targetCity) + "\n");
-            
-            //printMat2dInt(streetsInt);
-            //printMat2dInt(airlinesInt);
+        }
 
-            // add data to lists
-
-            //add first city
-            cityList = new List<City>();
-            
-
-            //then traverse the array contatining the airline while building the list
-            for (int i = 0; i < cities.GetLength(0); i++)
-            {
-                cityList.Add(new City(cities[i], i, airlinesInt[targetCity][i]));
-                //Console.WriteLine(cities[i] + "..." + airlinesInt[targetCity][i]);
-                
-            }
-
-            //add the street info to each city
-            for (int i = 0; i < cityList.Count; i++)
-            {
-                for (int j = 0; j < cityList.Count; j++)
-			    {
-                    if (i != j)
-                    {
-                        cityList.ElementAt(i).addNeighbor(cityList.ElementAt(j), streetsInt[i][j]);
-                    }
-			    }
-
-            }
-
-            // now cityList has the following info:
-            //  * air distances from chosen city to all the others
-            //  * list of neighbors to chosen city
-            //  * street distance to neighbors ( or max int when not directly reachable)
-
-            do_a_star(startingCity, targetCity);
-
-
-            Console.ReadKey();
+        private static void initIO(out int[][] streetsInt, out int[][] airlinesInt, out string[] cities)
+        {
+            Console.WindowWidth = 150;
+            string[][] streetsMat = csv_read("streets.csv");
+            string[][] airlinesMat = csv_read("airline.csv");
+            streetsInt = csv_toInt(streetsMat);
+            airlinesInt = csv_toInt(airlinesMat);
+            cities = extractCityNames(streetsMat);
         }
 
         private static void do_a_star(int initialCityIdx, int targetCityIdx)
@@ -118,7 +145,7 @@ namespace a_star
             {
                 //get next city in the open cities list
                 currentCity = openList.First().Value;
-Console.WriteLine(currentCity.name);
+Console.WriteLine(currentCity.Name);
                 current_f = openList.First().Key;
                 openList.RemoveAt(0);
 
@@ -131,8 +158,8 @@ Console.WriteLine(currentCity.name);
                     City path = currentCity;
                     while (path != null)
                     {
-                        Console.WriteLine(path.name);
-                        path = path.predecessor;
+                        Console.WriteLine(path.Name);
+                        path = path.Predecessor;
                     }
                     break;
                 }
@@ -155,7 +182,7 @@ Console.WriteLine(currentCity.name);
         /// <param name="currentCity"> the city to check for neighbor suitability</param>
         private static void expandCity(City currentCity, int current_f)
         {
-            foreach (KeyValuePair<City, int> neighbor in currentCity.neighbors)
+            foreach (KeyValuePair<City, int> neighbor in currentCity.Neighbors)
             {
                 // readability
                 City succesorCity = neighbor.Key;
@@ -172,22 +199,22 @@ Console.WriteLine(currentCity.name);
                     continue;
                 }
 
-                int tentative_g = currentCity.distanceUntilHere + succesorDistance;
+                int tentative_g = currentCity.DistanceUntilHere + succesorDistance;
 
                 //if possibleSuccesor is already in the open list
                 if (openList.ContainsValue(succesorCity))
                 {
                     // and tentative g is >= than the f stored for possibleSuccesor 
-                    if (tentative_g >= succesorCity.distanceUntilHere)
+                    if (tentative_g >= succesorCity.DistanceUntilHere)
                     {
                         //then ignore it
                         continue;                        
                     }
                 }
 
-                succesorCity.distanceUntilHere = tentative_g;
+                succesorCity.DistanceUntilHere = tentative_g;
 
-                int f = tentative_g + succesorCity.airDistance;
+                int f = tentative_g + succesorCity.AirDistance;
 
                 //to update f value (in case city is already in the openlist), remove old element 
                 if (openList.ContainsValue(succesorCity))
@@ -198,7 +225,7 @@ Console.WriteLine(currentCity.name);
                 openList.Add(f, succesorCity);
 
                 //write this path to this possible successor
-                succesorCity.predecessor = currentCity;
+                succesorCity.Predecessor = currentCity;
                 
 
 
