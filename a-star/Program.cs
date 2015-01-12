@@ -178,7 +178,7 @@ Console.WriteLine(currentCity.name);
                 if (openList.ContainsValue(succesorCity))
                 {
                     // and tentative g is >= than the f stored for possibleSuccesor 
-                    if (tentative_g >= openList.ElementAt(openList.IndexOfValue(succesorCity)).Key)
+                    if (tentative_g >= succesorCity.distanceUntilHere)
                     {
                         //then ignore it
                         continue;                        
