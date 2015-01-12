@@ -1,4 +1,12 @@
-﻿using System;
+﻿// ALD1
+// fh-wels.at
+// Daniel Peon
+// s1010564011
+// ATbbMaster2010
+// s1010564011@fh-wels.at
+
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
