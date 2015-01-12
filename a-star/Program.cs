@@ -11,7 +11,7 @@ namespace a_star
     {
         const char CSV_SEPARATOR = ';';
         static List<City> cityList;
-        static SortedList<City, int> openList;
+        static SortedList<int, City> openList;
         static List<City> closedList;
 
         static void Main(string[] args)
@@ -108,18 +108,18 @@ namespace a_star
         {
             City initialCity = cityList.ElementAt(initialCityIdx);
             City targetCity = cityList.ElementAt(targetCityIdx);
-            openList = new SortedList<City, int>();
+            openList = new SortedList<int, City>();
             closedList = new List<City>();
             int current_f;
 
-            openList.Add(initialCity, 0);
+            openList.Add(0, initialCity);
             City currentCity;
             do
             {
                 //get next city in the open cities list
-                currentCity = openList.First().Key;
+                currentCity = openList.First().Value;
 Console.WriteLine(currentCity.name);
-                current_f = openList.First().Value;
+                current_f = openList.First().Key;
                 openList.RemoveAt(0);
 
                 // are we done yet?
@@ -148,40 +148,43 @@ Console.WriteLine(currentCity.name);
         /// <param name="currentCity"> the city to check for neighbor suitability</param>
         private static void expandCity(City currentCity, int current_f)
         {
-            foreach (KeyValuePair<City, int> possibleSuccesor in currentCity.neighbors)
+            foreach (KeyValuePair<City, int> neighbor in currentCity.neighbors)
             {
-                if (closedList.Contains(possibleSuccesor.Key))
+                City posSuccesorCity = neighbor.Key;
+                int posSuccesorAirDistance = neighbor.Value;
+
+                if (closedList.Contains(posSuccesorCity))
                 {
                     continue;
                 }
 
-                if (possibleSuccesor.Value == int.MaxValue)
+                if (posSuccesorAirDistance == int.MaxValue)
                 {
                     continue;
                 }
 
-                int tentative_g = current_f + possibleSuccesor.Value;
+                int tentative_g = current_f + posSuccesorAirDistance;
 
                 //if possibleSuccesor is already in the open list
-                if (openList.ContainsKey(possibleSuccesor.Key))
+                if (openList.ContainsValue(posSuccesorCity))
                 {
                     // and tentative g is >= than the f stored for possibleSuccesor 
-                    if (tentative_g >= openList[possibleSuccesor.Key])
+                    if (tentative_g >= openList.ElementAt(openList.IndexOfValue(posSuccesorCity)).Key)
                     {
                         //then ignore it
                         continue;                        
                     }
                 }
-                int f = tentative_g + possibleSuccesor.Key.airDistance;
+                int f = tentative_g + posSuccesorCity.airDistance;
 
-                if (openList.ContainsKey(possibleSuccesor.Key))
+                //to update f value (in case city is already in the openlist), remove old element 
+                if (openList.ContainsValue(posSuccesorCity))
                 {
-                    openList[possibleSuccesor.Key] = f;
+                    openList.RemoveAt(openList.IndexOfValue(posSuccesorCity));
                 }
-                else
-                {
-                    openList.Add(possibleSuccesor.Key, f);
-                }
+                
+                openList.Add(f, posSuccesorCity);
+                
 
 
                 
