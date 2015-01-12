@@ -233,8 +233,8 @@ namespace a_star
         private static void initIO(out int[][] streetsInt, out int[][] airlinesInt, out string[] cities)
         {
             Console.WindowWidth = 150;
-            string[][] streetsMat = csv_read("streets.csv");
-            string[][] airlinesMat = csv_read("airline.csv");
+            string[][] streetsMat = csv_read("../../streets.csv");
+            string[][] airlinesMat = csv_read("../../airline.csv");
             streetsInt = csv_toInt(streetsMat);
             airlinesInt = csv_toInt(airlinesMat);
             cities = extractCityNames(streetsMat);
