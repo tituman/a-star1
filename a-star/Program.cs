@@ -11,7 +11,7 @@ namespace a_star
     {
         const char CSV_SEPARATOR = ';';
         static List<City> cityList;
-        static SortedList<int, City> openList;
+        static SortedList<int, City> openList; //used instead of a priority queue
         static List<City> closedList;
 
         static void Main(string[] args)
@@ -41,6 +41,7 @@ namespace a_star
 
             // declare new list of cities containing a data structure (City) which
             // integrates street distances and air distances
+            // array could also work OK, but lists are more comfortable
             cityList = new List<City>();
             
 
@@ -71,12 +72,116 @@ namespace a_star
 
 
             // begin finding path
-            do_a_star(startingCity, targetCity);
-
+            do_a_star(cityList.ElementAt(startingCity), cityList.ElementAt(targetCity));
 
             Console.ReadKey();
         }
 
+        private static void do_a_star(City initialCity, City targetCity)
+        {
+            //declare open and closed lists
+            openList = new SortedList<int, City>();
+            closedList = new List<City>();
+            int current_f;
+            City currentCity;
+
+            openList.Add(0, initialCity);
+
+            do
+            {
+                //get next city in the open cities list
+                currentCity = openList.First().Value;
+                current_f = openList.First().Key;
+                openList.RemoveAt(0);
+
+                // are we done yet?
+                if (currentCity.Equals(targetCity))
+                {
+                    // target found! print path
+                    printPath(currentCity);
+                    break;
+                }
+
+                closedList.Add(currentCity);
+                
+                expandCity(currentCity, current_f);
+
+            } while (openList.Count > 0);
+
+        }
+
+        /// <summary>
+        /// checks all neighbors to find the best next step
+        /// </summary>
+        /// <param name="currentCity">the city to check for neighbor suitability</param>
+        /// <param name="current_f">actual cost until now plus H() for rest of path</param>
+        private static void expandCity(City currentCity, int current_f)
+        {
+            foreach (KeyValuePair<City, int> neighbor in currentCity.Neighbors)
+            {
+                // for readability:
+                City succesorCity = neighbor.Key;
+                int succesorDistance = neighbor.Value;
+                // end readability
+
+                // skip city if already visited and closed
+                if (closedList.Contains(succesorCity))
+                {
+                    continue;
+                }
+
+                // ignore city if "no path to this neighbor"
+                if (succesorDistance == int.MaxValue)
+                {
+                    continue;
+                }
+
+                // wonderfully named variables that need no comments!
+                int tentative_g = currentCity.DistanceUntilHere + succesorDistance;
+
+                //if possibleSuccesor is already in the open list
+                if (openList.ContainsValue(succesorCity))
+                {
+                    // and tentative g is >= than the G() stored for possibleSuccesor 
+                    if (tentative_g >= succesorCity.DistanceUntilHere)
+                    {
+                        //then ignore it
+                        continue;                        
+                    }
+                }
+
+                succesorCity.DistanceUntilHere = tentative_g;
+
+                int f = tentative_g + succesorCity.AirDistance;
+
+                //to update f value (in case city is already in the openlist), remove old element 
+                if (openList.ContainsValue(succesorCity))
+                {
+                    openList.RemoveAt(openList.IndexOfValue(succesorCity));
+                }
+                
+                openList.Add(f, succesorCity);
+
+                //write this path to this possible successor
+                succesorCity.Predecessor = currentCity;
+                
+            }
+            
+        }
+
+        /// <summary>
+        /// simple method to print out the path found
+        /// </summary>
+        /// <param name="path">target city, which links to its predecessor</param>
+        private static void printPath(City path)
+        {
+            Console.WriteLine("\n==================\npath found! (in reverse order):\n==================\n");
+            while (path != null)
+            {
+                Console.WriteLine(path.Name);
+                path = path.Predecessor;
+            }
+        }
         private static void userInputStartAndTargetCity(string[] cities, out int startingCity, out int targetCity)
         {
             Console.WriteLine("enter start city: \n================");
@@ -121,6 +226,10 @@ namespace a_star
             Console.WriteLine("Chosen target city: " + cities.ElementAt(targetCity) + "\n");
         }
 
+
+// from here down this was made together with another student colleague
+// it is only reading the data from the csv files
+
         private static void initIO(out int[][] streetsInt, out int[][] airlinesInt, out string[] cities)
         {
             Console.WindowWidth = 150;
@@ -131,108 +240,6 @@ namespace a_star
             cities = extractCityNames(streetsMat);
         }
 
-        private static void do_a_star(int initialCityIdx, int targetCityIdx)
-        {
-            City initialCity = cityList.ElementAt(initialCityIdx);
-            City targetCity = cityList.ElementAt(targetCityIdx);
-            openList = new SortedList<int, City>();
-            closedList = new List<City>();
-            int current_f;
-
-            openList.Add(0, initialCity);
-            City currentCity;
-            do
-            {
-                //get next city in the open cities list
-                currentCity = openList.First().Value;
-Console.WriteLine(currentCity.Name);
-                current_f = openList.First().Key;
-                openList.RemoveAt(0);
-
-                // are we done yet?
-                if (currentCity.Equals(targetCity))
-                {
-                    // target found!
-                    // print path
-                    Console.WriteLine("\n==================\npath found!");
-                    City path = currentCity;
-                    while (path != null)
-                    {
-                        Console.WriteLine(path.Name);
-                        path = path.Predecessor;
-                    }
-                    break;
-                }
-
-                closedList.Add(currentCity);
-
-                expandCity(currentCity, current_f);
-
-
-                
-            } while (openList.Count > 0);
-
-
-
-        }
-
-        /// <summary>
-        /// checks all neighbors to find the best next step
-        /// </summary>
-        /// <param name="currentCity"> the city to check for neighbor suitability</param>
-        private static void expandCity(City currentCity, int current_f)
-        {
-            foreach (KeyValuePair<City, int> neighbor in currentCity.Neighbors)
-            {
-                // readability
-                City succesorCity = neighbor.Key;
-                int succesorDistance = neighbor.Value;
-                // end readability
-
-                if (closedList.Contains(succesorCity))
-                {
-                    continue;
-                }
-
-                if (succesorDistance == int.MaxValue)
-                {
-                    continue;
-                }
-
-                int tentative_g = currentCity.DistanceUntilHere + succesorDistance;
-
-                //if possibleSuccesor is already in the open list
-                if (openList.ContainsValue(succesorCity))
-                {
-                    // and tentative g is >= than the f stored for possibleSuccesor 
-                    if (tentative_g >= succesorCity.DistanceUntilHere)
-                    {
-                        //then ignore it
-                        continue;                        
-                    }
-                }
-
-                succesorCity.DistanceUntilHere = tentative_g;
-
-                int f = tentative_g + succesorCity.AirDistance;
-
-                //to update f value (in case city is already in the openlist), remove old element 
-                if (openList.ContainsValue(succesorCity))
-                {
-                    openList.RemoveAt(openList.IndexOfValue(succesorCity));
-                }
-                
-                openList.Add(f, succesorCity);
-
-                //write this path to this possible successor
-                succesorCity.Predecessor = currentCity;
-                
-
-
-                
-            }
-            
-        }
         static void printMat2d(string[][] mat)
         {
             for (int i = 0; i < mat.GetLength(0); i++)

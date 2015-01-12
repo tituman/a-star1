@@ -10,6 +10,7 @@ namespace a_star
         private string name;
         private int airDistance;  //H
         private int distanceUntilHere;  //G
+        // the choice of a Dictionary was arbitrary to learn more about Collections
         private Dictionary<City, int> neighbors;
         private City predecessor;
 
