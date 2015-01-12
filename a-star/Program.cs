@@ -129,7 +129,7 @@ Console.WriteLine(currentCity.name);
                     // print path
                     Console.WriteLine("\n==================\npath found!");
                     City path = currentCity;
-                    while (path.predecessor != null)
+                    while (path != null)
                     {
                         Console.WriteLine(path.name);
                         path = path.predecessor;
@@ -157,43 +157,48 @@ Console.WriteLine(currentCity.name);
         {
             foreach (KeyValuePair<City, int> neighbor in currentCity.neighbors)
             {
-                City posSuccesorCity = neighbor.Key;
-                int posSuccesorNeighborDistance = neighbor.Value;
+                // readability
+                City succesorCity = neighbor.Key;
+                int succesorDistance = neighbor.Value;
+                // end readability
 
-                if (closedList.Contains(posSuccesorCity))
+                if (closedList.Contains(succesorCity))
                 {
                     continue;
                 }
 
-                if (posSuccesorNeighborDistance == int.MaxValue)
+                if (succesorDistance == int.MaxValue)
                 {
                     continue;
                 }
 
-                int tentative_g = current_f + posSuccesorNeighborDistance;
+                int tentative_g = currentCity.distanceUntilHere + succesorDistance;
 
                 //if possibleSuccesor is already in the open list
-                if (openList.ContainsValue(posSuccesorCity))
+                if (openList.ContainsValue(succesorCity))
                 {
                     // and tentative g is >= than the f stored for possibleSuccesor 
-                    if (tentative_g >= openList.ElementAt(openList.IndexOfValue(posSuccesorCity)).Key)
+                    if (tentative_g >= openList.ElementAt(openList.IndexOfValue(succesorCity)).Key)
                     {
                         //then ignore it
                         continue;                        
                     }
                 }
-                int f = tentative_g + posSuccesorCity.airDistance;
+
+                succesorCity.distanceUntilHere = tentative_g;
+
+                int f = tentative_g + succesorCity.airDistance;
 
                 //to update f value (in case city is already in the openlist), remove old element 
-                if (openList.ContainsValue(posSuccesorCity))
+                if (openList.ContainsValue(succesorCity))
                 {
-                    openList.RemoveAt(openList.IndexOfValue(posSuccesorCity));
+                    openList.RemoveAt(openList.IndexOfValue(succesorCity));
                 }
                 
-                openList.Add(f, posSuccesorCity);
+                openList.Add(f, succesorCity);
 
                 //write this path to this possible successor
-                posSuccesorCity.predecessor = currentCity;
+                succesorCity.predecessor = currentCity;
                 
 
 

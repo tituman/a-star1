@@ -8,7 +8,10 @@ namespace a_star
     class City : IEquatable<City>, IComparable<City>
     {
         public string name;
+        //H
         public int airDistance;
+        //G
+        public int distanceUntilHere = 0;
         public int index;
         public Dictionary<City, int> neighbors;
         public City predecessor = null;
